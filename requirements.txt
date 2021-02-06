@@ -1,0 +1,9 @@
+mccabe==0.6.1
+mypy-extensions==0.4.3
+mysql==0.0.2
+mysql-connector==2.2.9
+mysqlclient==2.0.3
+pycodestyle==2.6.0
+pyflakes==2.2.0
+typed-ast==1.4.2
+typing-extensions==3.7.4.3
