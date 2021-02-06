@@ -1,13 +1,13 @@
-import datetime
+from datetime import date
 
 
 class Note:
 
-    def __init__(self, title: str, author: str, date: datetime.date,
+    def __init__(self, title: str, author: str, p_date: date,
                  content: str):
         self.title = title
         self.author = author
-        self.publish_date = date
+        self.publish_date = p_date
         self.content = content
 
     def __repr__(self):
@@ -20,7 +20,7 @@ class Note:
 
 if __name__ == "__main__":
     nakupne_polozky = "- milk\n- eggs\n- salt"
-    note1 = Note("Shopping", "Marek Nagy", datetime.date(2021, 1, 5),
+    note1 = Note("Shopping", "Marek Nagy", date(2021, 1, 5),
                  nakupne_polozky)
     print(note1)
     print(str(note1.publish_date))
