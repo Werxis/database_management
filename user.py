@@ -1,5 +1,5 @@
 from db_connect import cursor as c
-from typing import Tuple
+from typing import Tuple, Optional
 
 
 class User:
@@ -9,14 +9,16 @@ class User:
         self.surname = surname
 
     @property
-    def user_id(self):
+    def user_id(self) -> Optional[int]:
         c.execute("SELECT userID FROM Users "
                   "WHERE name = '{}' AND surname = '{}'"
                   .format(self.name, self.surname))
         got: Tuple[int] = c.fetchone()
+        if got is None:
+            print("This user is not in Users table!")
+            return None
         return got[0]
 
     def __repr__(self):
-        return "User ID: {}, {} {}".format(self.user_id, self.name, self.surname)
-
-
+        return "User: {} {}, id = {}".format(self.name, self.surname,
+                                             self.user_id)
