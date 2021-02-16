@@ -1,7 +1,7 @@
 import mysql.connector
 
-db_connection = mysql.connector.connect(host="sql11.freesqldatabase.com",
-                                        user="sql11392799",
-                                        password="fWevMJHwyB",
-                                        database="sql11392799")
+db_connection = mysql.connector.connect(host="freedb.tech",
+                                        user="freedbtech_marwer",
+                                        password="+>vQvgS6G",
+                                        database="freedbtech_marwerDB")
 cursor = db_connection.cursor()
