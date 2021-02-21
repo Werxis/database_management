@@ -1,5 +1,5 @@
-import os
-import shutil
+import os, shutil, hashlib, uuid
+from collections import Set
 
 DB_DIR_NAME = 'database'
 # users
@@ -12,9 +12,10 @@ NOTES_FILENAME = 'note.txt'
 OUT_ZIP_FILENAME = 'db.zip'
 
 class User:
-    def __init__(self, name: str, salted_password: str):
+    def __init__(self, name: str, salted_password: str, salt: str):
         self.username = name
         self.salted_password = salted_password
+        self.salt = salt
     
     def get_username(self):
         return self.username
@@ -51,14 +52,37 @@ class FileSystemDatabase:
             if not (is_dir and is_username):
                 raise Exception("Unknown directory {}".format(os.path.join(NOTES_DIR_NAME, dir)))
     
-    def load_users(self):
+    def login(self, username: str, password: str) -> bool:
+        success = False
+        username = username.strip()
+        if self.validate_username(username) and self.validate_password(password):
+            users = self.load_users()
+            for user in users:
+                if user.get_username() == username:
+                    success = user.get_hashed_password() == self.hash_password(password, user.get_salt())
+                    break
+        return success
+
+    def load_users(self) -> Set[User]:
         users = set()
         with open(os.path.join(USERS_DIR_NAME, USERS_FILENAME), 'r') as users_file:
             lines = list(map( lambda x: x[:-1], users_file.readlines()))
         for line in lines:
             lineParts = line.split(';')
-            users.add(User(lineParts[0], lineParts[1]))
+            users.add(User(lineParts[0], lineParts[1], line_parts[2]))
         return users
+    
+    def validate_username(self, username: str) -> bool:
+        return len(username) > 4 
+    
+    def validate_password(self, password: str) -> bool:
+        return len(password) > 0
+    
+    def hash_password(self, password: str, salt: str) -> str:
+        return hashlib.sha512(password + salt).hexdigest() 
+    
+    def get_new_salt(self):
+        return uuid.uuid4().hex
     
     def close_and_zip(self):
         os.chdir('..')
