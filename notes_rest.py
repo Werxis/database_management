@@ -1,7 +1,7 @@
 from flask import Flask, session
 from flask_restful import Api, Resource, request
-from flask_db import db, UserModel
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
+from flask_db import db, UserModel, NoteModel
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import os
 import json
 
@@ -78,25 +78,44 @@ class LoginView(Resource):
         else:
             return login_error_message
 
-# # class NoteView(Resource):
-# #     def put(self):
-# #         input_json = request.get_data()
-# #         title = input_json["title"]
-# #         body = input_json["body"]
+class NoteView(Resource):
+    @login_required
+    def get(self):
+        pass
 
-# #         note = NoteModel.query.filter_by(title=title).first()
+    @login_required
+    def put(self):
+        user = current_user
+        input_json = json.loads(request.get_data().decode('UTF-8'))
+        title = input_json["title"]
+        body = input_json["body"]
 
-# #         if note is None:
-# #             note = NoteModel(title, body)
-# #         else:
-# #             note.update(body)
+        note = NoteModel.query.filter_by(id=id, )..first()
+
+        if note is None:
+            note = NoteModel(title, body)
+        else:
+            note.update(body)
         
-# #         db.session.add(note)
-# #         db.session.commit()
+        db.session.add(note)
+        db.session.commit()
 
-# #         return note.json()
+        return note.json()
+    
+    @login_required
+    def delete(self):
+        input_json = json.loads(request.get_data().decode('UTF-8'))
+        title = input_json["title"]
 
-# # api.add_resource(NoteView, '/note')
+        note = NoteModel.query.filter_by(title=title).first()
+        if note is not None:
+            db.session.delete(note)
+            db.session.commit()
+            return {'message': "Note deleted."}
+        else:
+            return {'message': "Note not found."}, 404
+
+api.add_resource(NoteView, '/notes')
 
 api.add_resource(LoginView, '/login')
 
