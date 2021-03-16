@@ -1,41 +1,48 @@
 from datetime import datetime
 import hashlib, uuid
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Table, Column, Integer, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from flask_login import UserMixin
 import bcrypt
 
 db = SQLAlchemy()
 
-# class NoteModel(db.Model):
-#     __tablename__ = "notes"
+class NoteModel(db.Model):
+    __tablename__ = "notes"
 
-#     id = db.Column(db.Integer, primary_key=True)
-#     title = db.Column(db.String(50), unique=True)
-#     body = db.Column(db.Text, nullable=False)
-#     last_update = db.Column(db.DateTime)
+    id = Column(Integer, primary_key=True)
+    title = Column(String(50), unique=True)
+    body = Column(Text, nullable=False)
+    last_update = Column(DateTime, unique=True)
 
-#     def __init__(self, title: str, body: str):
-#         self.title = title
-#         self.body = body
-#         self.last_update = datetime.now()
+    user_id = Column(dInteger, ForeignKey('users.id'))
+    user = relationship("UserModel", back_populates="notes")
+
+    def __init__(self, username: str, title: str, body: str):
+        self.title = title
+        self.body = body
+        self.last_update = datetime.now()
     
-#     def update(self, body: str):
-#         self.body = body
-#         self.last_update = datetime.now()
+    def update(self, body: str):
+        self.body = body
+        self.last_update = datetime.now()
     
-#     def json(self):
-#         return {
-#             "title": self.title,
-#             "body": self.body,
-#             "last_update": self.last_update
-#         }
+    def json(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "body": self.body,
+            "last_update": self.last_update
+        }
 
 class UserModel(UserMixin, db.Model):
     __tablename__ = "users"
 
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(30), unique=True)
-    salted_password = db.Column(db.String(100), nullable=False)
+    id = Column(Integer, primary_key=True)
+    username = Column(String(30), unique=True)
+    salted_password = Column(String(100), nullable=False)
+    notes = relationship("NoteModel", back_populates="user")
 
     def __init__(self, username: str, password: str):
         self.username = username
@@ -46,8 +53,8 @@ class UserModel(UserMixin, db.Model):
     
     def json(self):
         return {
-            'username': self.username,
-            'salted_password': self.salted_password
+            'id': self.id,
+            'username': self.username
         }
 
 def compare_passwords(password: str, salted_password: str) -> bool:
