@@ -1,7 +1,7 @@
 from datetime import datetime
 import hashlib, uuid
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Table, Column, Integer, DateTime, ForeignKey
+from sqlalchemy import Table, Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
 import bcrypt
@@ -16,7 +16,7 @@ class NoteModel(db.Model):
     body = Column(Text, nullable=False)
     last_update = Column(DateTime, unique=True)
 
-    user_id = Column(dInteger, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship("UserModel", back_populates="notes")
 
     def __init__(self, username: str, title: str, body: str):
