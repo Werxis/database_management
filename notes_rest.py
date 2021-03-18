@@ -26,13 +26,29 @@ login_error_message = {
     'message': "Username or password is invalid."
     }
 
+register_error_message = {
+    'success': False,
+    'message': "Username is already being used."
+    }
+
 @app.before_first_request
 def create_table():
     db.create_all()
 
 class LoginView(Resource):
+    # user for testing login
+    #@login_required
+    def get(self):
+        if current_user.is_authenticated:
+            return {'message': 'You are logged in.'}
+        else:
+            return {'message': 'You are not logged in.'}
+
     # used for login
     def put(self):
+        if current_user.is_authenticated:
+            return {'message':'User already logged in.'}, 400
+
         input_json = json.loads(request.get_data().decode('UTF-8'))
         username = input_json['username']
         password = input_json['password']
@@ -47,13 +63,6 @@ class LoginView(Resource):
                 }
         else:
             return login_error_message
-    
-    @login_required
-    def delete(self):
-        logout_user()
-        return {
-            'message': 'You are now logged out.'
-        }
     
     # used for register
     def post(self):
@@ -76,7 +85,17 @@ class LoginView(Resource):
                 'id': user.id
                 }
         else:
-            return login_error_message
+            return register_error_message
+
+
+class LogoutView(Resource):
+    @login_required
+    def delete(self):
+        #print(current_user)
+        logout_user()
+        return {
+            'message': 'You are now logged out.'
+        }
 
 class NoteView(Resource):
     @login_required
@@ -90,7 +109,7 @@ class NoteView(Resource):
         title = input_json["title"]
         body = input_json["body"]
 
-        note = NoteModel.query.filter_by(id=id, )..first()
+        note = NoteModel.query.filter_by(id=id, ).first()
 
         if note is None:
             note = NoteModel(title, body)
@@ -118,6 +137,7 @@ class NoteView(Resource):
 api.add_resource(NoteView, '/notes')
 
 api.add_resource(LoginView, '/login')
+api.add_resource(LogoutView, '/logout')
 
 if __name__ == "__main__":
     app.secret_key = os.urandom(64)
