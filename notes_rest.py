@@ -47,7 +47,7 @@ class LoginView(Resource):
     # used for login
     def put(self):
         if current_user.is_authenticated:
-            return {'message':'User already logged in.'}, 400
+            return {'message':'User already logged in.'}, 403
 
         input_json = json.loads(request.get_data().decode('UTF-8'))
         username = input_json['username']
