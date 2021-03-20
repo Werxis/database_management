@@ -17,14 +17,16 @@ class NoteModel(db.Model):
     last_update = Column(DateTime, unique=True)
 
     user_id = Column(Integer, ForeignKey('users.id'))
-    user = relationship("UserModel", back_populates="notes")
+    #user = relationship("UserModel", back_populates="notes")
 
-    def __init__(self, username: str, title: str, body: str):
+    def __init__(self, user, title: str, body: str):
+        self.user = user
         self.title = title
         self.body = body
         self.last_update = datetime.now()
     
-    def update(self, body: str):
+    def update(self, title: str, body: str):
+        self.title = title
         self.body = body
         self.last_update = datetime.now()
     
@@ -33,7 +35,7 @@ class NoteModel(db.Model):
             "id": self.id,
             "title": self.title,
             "body": self.body,
-            "last_update": self.last_update
+            "last_update": datetime_to_str(self.last_update)
         }
 
 class UserModel(UserMixin, db.Model):
@@ -42,7 +44,7 @@ class UserModel(UserMixin, db.Model):
     id = Column(Integer, primary_key=True)
     username = Column(String(30), unique=True)
     salted_password = Column(String(100), nullable=False)
-    notes = relationship("NoteModel", back_populates="user")
+    notes = relationship("NoteModel", backref="user")
 
     def __init__(self, username: str, password: str):
         self.username = username
@@ -62,3 +64,9 @@ def compare_passwords(password: str, salted_password: str) -> bool:
 
 def get_salted_password(password: str) -> str:
     return bcrypt.hashpw(password, bcrypt.gensalt(10) )
+
+def datetime_to_str(dt):
+    return '{}.{}.{}-{}:{}:{}'.format(
+        dt.year, dt.month, dt.day,
+        dt.hour, dt.minute, dt.second
+    )
